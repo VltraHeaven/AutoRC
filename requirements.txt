@@ -1,0 +1,6 @@
+argcomplete==1.11.1
+click==7.1.2
+pipx==0.15.4.0
+selenium==3.141.0
+urllib3==1.25.9
+userpath==1.4.0

@@ -47,39 +47,17 @@ def delete(firstn, lastn, fulln, email, title):
     write(firstn, into='First Name')
     write(lastn, into='Last Name')
     write(title, into='Job Title')
-    if Button('Verify Email Uniqueness').is_enabled():
-        click(Button('Verify Email Uniqueness'))
-    else:
-        print(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
-        return
 
-    loading()
-
-    if Text('Duplicate Email Association').exists():
-        loading()
-        regname = Text(below='Name').value
-        ext = Text(below='Ext.').value
-        print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
-    elif Text('Email address is already in use.').exists():
-        loading()
-        print('Unable to retrieve ' + fulln + '\'s extension. Will try to remove based on user\'s name.')
-        regname = fulln
-    else:
-        print(fulln + ' does not have an assigned extension.')
-        return
-
-    def usercheck(extension):
+    def usercheck(query):
         nav_assign()
         loading()
         write('', into='Search Users')
-        write(extension, into='Search Users')
+        write(query, into='Search Users')
         press(ENTER)
         loading()
         select(ComboBox('Show:'), 'All')
-        if Button(regname).exists():
-            exists = True
-        else:
-            exists = False
+        loading()
+        exists = Button(regname).exists()
         return exists
 
     def userdisable():
@@ -99,7 +77,35 @@ def delete(firstn, lastn, fulln, email, title):
         click('Confirm')
         loading()
 
-    userexists = usercheck(ext)
+    if Button('Verify Email Uniqueness').is_enabled():
+        click(Button('Verify Email Uniqueness'))
+    else:
+        print(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
+        return
+
+    loading()
+
+    if Text('Duplicate Email Association').exists():
+        loading()
+        regname = Text(below='Name').value
+        ext = Text(below='Ext.').value
+        print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
+        userexists = usercheck(ext)
+    elif Text('Email address is already in use.').exists():
+        loading()
+        print('Unable to retrieve ' + fulln + '\'s extension using email address. Will try to find the extension based on user\'s display name.')
+        regname = fulln
+        userexists = usercheck(regname)
+        if userexists:
+            ext = Text(below='Ext.', to_right_of=regname).value
+            print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
+        else:
+            print(fulln + ' not found. Skipping...')
+            return
+    else:
+        print(fulln + ' does not have an assigned extension.')
+        return
+
     deletetry = 0
     while userexists:
         deletetry += 1

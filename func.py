@@ -88,7 +88,7 @@ def delete(firstn, lastn, fulln, email, title):
     if Text('Duplicate Email Association').exists():
         loading()
         regname = Text(below='Name').value
-        ext = Text(below='Ext.').value
+        ext = Text(below='Ext.', to_right_of=regname).value
         print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
         userexists = usercheck(ext)
     elif Text('Email address is already in use.').exists():

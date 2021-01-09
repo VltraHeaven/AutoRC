@@ -97,7 +97,7 @@ def delete(firstn, lastn, fulln, email, title):
         regname = fulln
         userexists = usercheck(regname)
         if userexists:
-            ext = Text(below='Ext.', to_right_of=regname).value
+            ext = Text(to_right_of=lastn, below='Number').value
             print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
         else:
             print(fulln + ' not found. Skipping...')

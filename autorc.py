@@ -49,8 +49,8 @@ if __name__ == "__main__":
 
     def init_argparse() -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser(
-            usage="Usage: " + sys.argv[0] + " [-h] [-a | -r] [file]",
-            description="Description: Automatically assign or remove RingCentral extensions."
+            usage="python " + sys.argv[0] + " [-h] [-a | -r] [file]",
+            description="description: Automatically assign or remove RingCentral extensions."
         )
         group = parser.add_mutually_exclusive_group()
         group.add_argument('-a', '--assign', help='Assign RingCentral extensions', action='store_true')

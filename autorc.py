@@ -26,7 +26,7 @@ class Users:
                 print('Extension assignment and configuration for ' + nhdisplayname + ' complete.')
         print('RingCentral accounts created successfully.')
         kill_browser()
-        sys.exit(0)
+        
 
     def delext(self):
         login()
@@ -42,7 +42,7 @@ class Users:
                 print('Extension removal for ' + nhdisplayname + ' complete.')
         print('RingCentral accounts successfully removed.')
         kill_browser()
-        sys.exit(0)
+        
 
 
 if __name__ == "__main__":
@@ -71,6 +71,7 @@ if __name__ == "__main__":
         else:
             assign_init = Users(aparser.file)
             assign_init.newext()
+            sys.exit(0)
     elif aparser.remove:
         if not aparser.file:
             print(aparser.usage)
@@ -78,5 +79,6 @@ if __name__ == "__main__":
         else:
             remove_init = Users(aparser.file)
             remove_init.delext()
+            sys.exit(0)
     else:
         print(aparser.usage + '\n' + aparser.description)

@@ -57,7 +57,7 @@ if __name__ == "__main__":
         group.add_argument('-r', '--remove', help='Remove RingCentral extension assignments', action='store_true')
         parser.add_argument('file',
                             help='Path to the userlist .csv file.\nThe .csv must at least have the following '
-                                 'case-sensitive headers: givenName,surname,name,emailAddress,Title\n"')
+                                 'case-sensitive headers: givenName,surname,name,emailAddress,Title\n')
         return parser
 
 

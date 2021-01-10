@@ -19,23 +19,38 @@ def login():
     wait_until(Text("Admin Portal").exists, timeout_secs=120, interval_secs=.5)
 
 
-def nav_assign():
+def nav_assigned():
     url = 'https://service.ringcentral.com/application/users/users/default'
     go_to(url)
+    select(ComboBox('Show:'), 'All')
 
 
-def nav_unassign():
+def nav_unassigned():
     url = 'https://service.ringcentral.com/application/users/users/unassigned'
     go_to(url)
+    select(ComboBox('Show:'), 'All')
 
 
 def loading():
-    wait_until(lambda: not Text("Loading...").exists())
-    wait_until(lambda: not Alert("Loading...").exists())
-    time.sleep(3)
+    loaddone = False
+    while not loaddone:
+        if Text("Loading").exists():
+            print("Waiting for \'Loading...\' prompt to resolve")
+            wait_until(lambda: not Text("Loading...").exists())
+        elif Alert("Loading").exists():
+            print("Waiting for \'Loading...\' alert to resolve")
+            wait_until(lambda: not Alert("Loading...").exists())
+        else:
+            loaddone = True
+    countdown = 3
+    while countdown > 0:
+        print("Resuming in " + str(countdown))
+        time.sleep(1)
+        countdown += -1
+
 
 def delete(firstn, lastn, fulln, email, title):
-    nav_unassign()
+    nav_unassigned()
     print('Checking for ' + fulln + '\'s assigned RingCentral Extension, please wait...')
     loading()
     write('Ext', into='Search Users')
@@ -49,13 +64,11 @@ def delete(firstn, lastn, fulln, email, title):
     write(title, into='Job Title')
 
     def usercheck(query):
-        nav_assign()
+        nav_assigned()
         loading()
         write('', into='Search Users')
         write(query, into='Search Users')
         press(ENTER)
-        loading()
-        select(ComboBox('Show:'), 'All')
         loading()
         exists = Button(regname).exists()
         return exists
@@ -93,7 +106,8 @@ def delete(firstn, lastn, fulln, email, title):
         userexists = usercheck(ext)
     elif Text('Email address is already in use.').exists():
         loading()
-        print('Unable to retrieve ' + fulln + '\'s extension using email address. Will try to find the extension based on user\'s display name.')
+        print(
+            'Unable to retrieve ' + fulln + '\'s extension using email address. Will try to find the extension based on user\'s display name.')
         regname = fulln
         userexists = usercheck(regname)
         if userexists:
@@ -110,7 +124,8 @@ def delete(firstn, lastn, fulln, email, title):
     while userexists:
         deletetry += 1
         if deletetry >= 6:
-            print('Maximum attempts for account removal failed. Please manually delete ' + regname + ', Ext. ' + ext + ' from RingCentral.')
+            print(
+                'Maximum attempts for account removal failed. Please manually delete ' + regname + ', Ext. ' + ext + ' from RingCentral.')
             break
         print('Account removal attempt ' + str(deletetry) + ' out of 5.')
         if deletetry == 5:
@@ -136,13 +151,13 @@ def delete(firstn, lastn, fulln, email, title):
 
 
 def assign(firstn, lastn, fulln, email, title):
-    nav_unassign()
+    nav_unassigned()
     print('Assigning ' + fulln + ' a RingCentral Extension, please wait...')
     loading()
     write('app', into='Search Users')
     press(ENTER)
     wait_until(Text("Ext. with RingCentral Phone app").exists)
-    time.sleep(5)
+    loading()
     click('Ext. with RingCentral Phone app')
     loading()
     write(email, into='Email Address')
@@ -151,16 +166,14 @@ def assign(firstn, lastn, fulln, email, title):
     write(title, into='Job Title')
     if Button('Verify Email Uniqueness').is_enabled():
         click(Button('Verify Email Uniqueness'))
+        loading()
     else:
         print(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
         return
 
-    loading()
-
     if Text('Duplicate Email Association').exists():
-        print(fulln + ' already has an assigned RingCentral extension')
-        time.sleep(3)
-        ext = Text(below='Ext.').value
+        ext = Text(below='Ext', to_left_of=email).value
+        print(fulln + ' has already been assigned extension ' + ext)
         return ext
 
     else:
@@ -173,26 +186,28 @@ def assign(firstn, lastn, fulln, email, title):
         click(CheckBox('Yes, I would like to receive information on product education, training materials, etc'))
 
     ext = TextField('Extension Number').value
-    time.sleep(5)
+    loading()
     click(Text('Save'))
-    time.sleep(5)
+    loading()
     print(fulln + ' has been assigned RingCentral Extension: ' + str(ext))
     return ext
 
 
 def set_fward(fulln, ext):
-    nav_assign()
+    nav_assigned()
     loading()
     write('', into='Search Users')
     write(ext, into='Search Users')
     press(ENTER)
+    wait_until(Button(fulln).exists)
     wait_until(Button(fulln).is_enabled, timeout_secs=120, interval_secs=.5)
-    time.sleep(5)
+    loading()
     click(Button(fulln))
     loading()
     click('Call Handling & Forwarding')
     loading()
     select(ComboBox('Ring For'), '15 Rings / 75 Secs')
+    loading()
     click(Text('Save'))
     print('Forwarding settings for ' + fulln + ' have been set.')
     del ext

@@ -2,6 +2,7 @@ from helium import *
 import csv
 import argparse
 import sys
+import os
 from func import delete, assign, set_fward, login
 
 
@@ -9,11 +10,17 @@ class Users:
     def __init__(self, filepath):
         self.filepath = filepath
 
+    def filecheck(self):
+        if not os.path.isfile(self.filepath):
+            sys.exit("The specified file does not exist.")
+
+
     def newext(self):
+        self.filecheck()
         login()
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
-            for row in reader:
+            for line_num, row in enumerate(reader):
                 nhfirstname = row['givenName']
                 nhlastname = row['surname']
                 nhdisplayname = row['name']
@@ -29,10 +36,11 @@ class Users:
         
 
     def delext(self):
+        self.filecheck()
         login()
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
-            for row in reader:
+            for line_num, row in enumerate(reader):
                 nhfirstname = row['givenName']
                 nhlastname = row['surname']
                 nhdisplayname = row['name']

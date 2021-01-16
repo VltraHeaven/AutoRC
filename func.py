@@ -1,7 +1,7 @@
 from helium import *
 import time
 from selenium.webdriver import ChromeOptions
-
+from selenium.common import exceptions
 
 def login():
     # WebDriver setting
@@ -32,22 +32,28 @@ def nav_unassigned():
 
 
 def loading():
-    loaddone = False
-    while not loaddone:
+    loaded = False
+    while not loaded:
         if Text("Loading").exists():
             print("Waiting for \'Loading...\' prompt to resolve")
-            wait_until(lambda: not Text("Loading...").exists(), timeout_secs=60, interval_secs=.1)
+            try:
+                wait_until(lambda: not Text("Loading...").exists(), timeout_secs=10, interval_secs=.1)
+            except exceptions.TimeoutException:
+                pass
         elif Alert("Loading").exists():
             print("Waiting for \'Loading...\' alert to resolve")
-            wait_until(lambda: not Alert("Loading...").exists(), timeout_secs=60, interval_secs=.1)
+            try:
+                wait_until(lambda: not Alert("Loading...").exists(), timeout_secs=10, interval_secs=.1)
+            except exceptions.TimeoutException:
+                pass
         else:
-            print("Loading the RingCentral Webpage")
-            loaddone = True
-    countdown = 3
-    print("Resuming in " + str(countdown) + " seconds.")
-    while countdown > 0:
-        time.sleep(1)
-        countdown += -1
+            # print("Loading the RingCentral Webpage")
+            countdown = 2
+            # print("Resuming in " + str(countdown) + " seconds.")
+            while countdown > 0:
+                time.sleep(1)
+                countdown += -1
+            loaded = True
 
 
 def delete(firstn, lastn, fulln, email, title):
@@ -214,7 +220,20 @@ def set_forward(fn, ln, ext):
     loading()
     click('Call Handling & Forwarding')
     loading()
-    select(ComboBox('Ring For'), '15 Rings / 75 Secs')
+    current_rings = ComboBox('Ring For').value
+    max_rings = '15 Rings / 75 Secs'
+    rings_set = False
+    while not rings_set:
+        if current_rings != max_rings:
+            select(ComboBox('Ring For'), max_rings)
+            click(Text('Save'))
+            loading()
+        elif S('.rc-toggle-off', to_left_of='Always ring for at least 30 seconds before forwarding is completed.').exists():
+            click(S('.rc-toggle-input', to_left_of='Always ring for at least 30 seconds before forwarding is completed.'))
+            click(Text('Save'))
+            loading()
+        else:
+            rings_set = True
     loading()
     click(Text('Save'))
     print('Forwarding settings for {0} {1} have been set.'.format(fn, ln))

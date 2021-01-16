@@ -192,25 +192,31 @@ def assign(firstn, lastn, fulln, email, title):
     loading()
     click(Text('Save'))
     loading()
-    print(fulln + ' has been assigned RingCentral Extension: ' + str(ext))
+    print('{0} has been assigned RingCentral Extension: {1}'.format(fulln, ext))
     return ext
 
 
-def set_fward(fulln, ext):
+def set_forward(fn, ln, ext):
     nav_assigned()
     loading()
     write('', into='Search Users')
     write(ext, into='Search Users')
     press(ENTER)
-    wait_until(Button(fulln).exists)
-    wait_until(Button(fulln).is_enabled, timeout_secs=120, interval_secs=.5)
     loading()
-    click(Button(fulln))
+    if not Text(ln).exists():
+        wait_until(Button(fn).exists)
+        wait_until(Button(fn).is_enabled, timeout_secs=60, interval_secs=.5)
+        click(Button(fn))
+    else:
+        wait_until(Button(ln).exists)
+        wait_until(Button(ln).is_enabled, timeout_secs=60, interval_secs=.5)
+        click(Button(ln))
     loading()
     click('Call Handling & Forwarding')
     loading()
     select(ComboBox('Ring For'), '15 Rings / 75 Secs')
     loading()
     click(Text('Save'))
-    print('Forwarding settings for ' + fulln + ' have been set.')
+    print('Forwarding settings for {0} {1} have been set.'.format(fn, ln))
+    loading()
     del ext

@@ -36,15 +36,16 @@ def loading():
     while not loaddone:
         if Text("Loading").exists():
             print("Waiting for \'Loading...\' prompt to resolve")
-            wait_until(lambda: not Text("Loading...").exists())
+            wait_until(lambda: not Text("Loading...").exists(), timeout_secs=60, interval_secs=.1)
         elif Alert("Loading").exists():
             print("Waiting for \'Loading...\' alert to resolve")
-            wait_until(lambda: not Alert("Loading...").exists())
+            wait_until(lambda: not Alert("Loading...").exists(), timeout_secs=60, interval_secs=.1)
         else:
+            print("Loading the RingCentral Webpage")
             loaddone = True
     countdown = 3
+    print("Resuming in " + str(countdown) + " seconds.")
     while countdown > 0:
-        print("Resuming in " + str(countdown))
         time.sleep(1)
         countdown += -1
 
@@ -154,8 +155,10 @@ def assign(firstn, lastn, fulln, email, title):
     nav_unassigned()
     print('Assigning ' + fulln + ' a RingCentral Extension, please wait...')
     loading()
+    wait_until(TextField('Search Users').exists)
     write('app', into='Search Users')
     press(ENTER)
+    loading()
     wait_until(Text("Ext. with RingCentral Phone app").exists)
     loading()
     click('Ext. with RingCentral Phone app')

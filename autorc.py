@@ -3,7 +3,7 @@ import csv
 import argparse
 import sys
 import os
-from func import delete, assign, set_fward, login
+from func import delete, assign, set_forward, login
 
 
 class Users:
@@ -13,7 +13,6 @@ class Users:
     def filecheck(self):
         if not os.path.isfile(self.filepath):
             sys.exit("The specified file does not exist.")
-
 
     def newext(self):
         self.filecheck()
@@ -28,12 +27,11 @@ class Users:
                 nhtitle = row['Title']
                 assignedext = assign(nhfirstname, nhlastname, nhdisplayname, nhemail, nhtitle)
                 if assignedext is not None:
-                    set_fward(nhdisplayname, assignedext)
+                    set_forward(nhfirstname, nhlastname, assignedext)
                     del assignedext
                 print('Extension assignment and configuration for ' + nhdisplayname + ' complete.')
         print('RingCentral accounts created successfully.')
         kill_browser()
-        
 
     def delext(self):
         self.filecheck()
@@ -50,7 +48,6 @@ class Users:
                 print('Extension removal for ' + nhdisplayname + ' complete.')
         print('RingCentral accounts successfully removed.')
         kill_browser()
-        
 
 
 if __name__ == "__main__":

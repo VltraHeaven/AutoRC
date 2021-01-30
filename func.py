@@ -2,6 +2,8 @@ from helium import *
 import time
 from selenium.webdriver import ChromeOptions
 from selenium.common import exceptions
+import sys
+
 
 def login():
     # WebDriver setting
@@ -10,11 +12,17 @@ def login():
     # Helium Config
     Config.implicit_wait_secs = 120
     start_chrome('https://service.ringcentral.com/', options=options)
-    wait_until(Text("Single Sign-on").exists)
-    click('Single Sign-on')
-
-    print('Enter your email address in the browser and click "Submit" to log into RingCentral.')
-    print('This script will continue when you have successfully accessed the Admin Portal.')
+    try:
+        wait_until(Text("Single Sign-on").exists)
+        click('Single Sign-on')
+    except exceptions.TimeoutException or exceptions.StaleElementReferenceException or exceptions.NoSuchElementException:
+        print('Click the Single Sign-on button, enter your email address in the browser and click "Submit" to log '
+              'into RingCentral.')
+        time.sleep(2)
+    else:
+        print('Enter your email address in the browser and click "Submit" to log into RingCentral.')
+    finally:
+        print('This script will continue when you have successfully accessed the Admin Portal.')
     wait_until(Text("Admin").exists, timeout_secs=120, interval_secs=.5)
 
 
@@ -28,6 +36,33 @@ def nav_unassigned():
     go_to(url)
 
 
+def available_ext(users_sum):
+    need_ext = True
+    while need_ext:
+        nav_unassigned()
+        wait_until(TextField('Search Users').exists)
+        write('app', into='Search Users')
+        press(ENTER)
+        loading()
+        select(ComboBox('Show:'), 'All')
+        loading()
+        print('Checking for available extensions')
+        total_ext = int(Text('Total: ').value.strip('Total: '))
+        if total_ext > 0:
+            print(str(users_sum) + ' users remaining and ' + str(total_ext) + ' available RingCentral extensions')
+            need_ext = False
+        else:
+            try:
+                confirm = input(
+                    "There are no available extensions. Please purchase {0} extensions and enter any key to continue "
+                    "or [e] to exit").format(users_sum)
+                if confirm.strip('[]') == 'e' or confirm.strip('[]') == 'E':
+                    kill_browser()
+                    sys.exit('Terminating')
+            finally:
+                time.sleep(1)
+
+
 def loading():
     loaded = False
     while not loaded:
@@ -35,24 +70,25 @@ def loading():
             print("Waiting for \'Loading...\' prompt to resolve")
             try:
                 wait_until(lambda: not Text("Loading...").exists(), timeout_secs=10, interval_secs=.5)
-            except:
-                time.sleep(1)
+            except exceptions as e:
+                print(e)
+                time.sleep(3)
             else:
-                time.sleep(1)
+                time.sleep(3)
         elif Alert("Loading").exists():
             print("Waiting for \'Loading...\' alert to resolve")
             try:
                 wait_until(lambda: not Alert("Loading...").exists(), timeout_secs=10, interval_secs=.5)
-            except:
-                time.sleep(1)
+            except exceptions as e:
+                print(e)
+                time.sleep(3)
             else:
-                time.sleep(1)
+                time.sleep(3)
         else:
             # print("Loading the RingCentral Webpage")
             del loaded
             loaded = True
-            time.sleep(1)
-
+            time.sleep(3)
 
 
 def delete(firstn, lastn, fulln, email, title):
@@ -158,18 +194,17 @@ def delete(firstn, lastn, fulln, email, title):
             userexists = usercheck(ext)
 
 
-def assign(firstn, lastn, fulln, email, title):
-    nav_unassigned()
+def assign(firstn, lastn, fulln, email, title, count, line):
+    remaining_users = count - line
     print('Assigning ' + fulln + ' a RingCentral Extension, please wait...')
+    available_ext(remaining_users)
     loading()
-    wait_until(TextField('Search Users').exists)
-    write('app', into='Search Users')
-    press(ENTER)
-    loading()
-    select(ComboBox('Show:'), 'All')
-    wait_until(Text("Ext. with RingCentral Phone app").exists)
-    loading()
-    click('Ext. with RingCentral Phone app')
+    try:
+        wait_until(Text("Ext. with RingCentral Phone app").exists)
+    except exceptions.TimeoutException:
+        time.sleep(3)
+    finally:
+        click('Ext. with RingCentral Phone app')
     loading()
     write(email, into='Email Address')
     write(firstn, into='First Name')
@@ -213,13 +248,21 @@ def set_forward(fn, ln, ext):
     loading()
     select(ComboBox('Show:'), 'All')
     if not Text(ln).exists():
-        wait_until(Button(fn).exists)
-        wait_until(Button(fn).is_enabled, timeout_secs=60, interval_secs=.5)
-        click(Button(fn))
+        try:
+            wait_until(Button(fn).exists)
+            wait_until(Button(fn).is_enabled, timeout_secs=60, interval_secs=.5)
+        except exceptions.TimeoutException as e:
+            print(e)
+        finally:
+            click(Button(fn))
     else:
-        wait_until(Button(ln).exists)
-        wait_until(Button(ln).is_enabled, timeout_secs=60, interval_secs=.5)
-        click(Button(ln))
+        try:
+            wait_until(Button(ln).exists)
+            wait_until(Button(ln).is_enabled, timeout_secs=60, interval_secs=.5)
+        except exceptions.TimeoutException as e:
+            print(e)
+        finally:
+            click(Button(fn))
     loading()
     wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=60, interval_secs=.5)
     click('Call Handling & Forwarding')
@@ -227,8 +270,12 @@ def set_forward(fn, ln, ext):
     max_rings = '15 Rings / 75 Secs'
     rings_set = False
     while not rings_set:
-        wait_until(ComboBox('Ring For', to_left_of='Desktop').exists, timeout_secs=60, interval_secs=.5)
-        current_rings = ComboBox('Ring For').value
+        try:
+            wait_until(ComboBox('Ring For', to_left_of='Desktop').exists, timeout_secs=60, interval_secs=.5)
+            current_rings = ComboBox('Ring For').value
+        except exceptions.StaleElementReferenceException as e:
+            print(e)
+            continue
         if current_rings != max_rings:
             select(ComboBox('Ring For'), max_rings)
             click(Text('Save'))

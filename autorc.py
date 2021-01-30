@@ -17,6 +17,13 @@ class Users:
     def newext(self):
         self.filecheck()
         login()
+        count = 0
+        with open(self.filepath) as usercount:
+            count_line = csv.DictReader(usercount)
+            for line_num in enumerate(count_line):
+                count += 1
+        print(str(count) + ' new extensions will be created.')
+
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
             for line_num, row in enumerate(reader):
@@ -25,7 +32,7 @@ class Users:
                 nhdisplayname = row['name']
                 nhemail = row['emailAddress']
                 nhtitle = row['Title']
-                assignedext = assign(nhfirstname, nhlastname, nhdisplayname, nhemail, nhtitle)
+                assignedext = assign(nhfirstname, nhlastname, nhdisplayname, nhemail, nhtitle, count, line_num)
                 if assignedext is not None:
                     set_forward(nhfirstname, nhlastname, assignedext)
                     del assignedext

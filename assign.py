@@ -81,23 +81,35 @@ def set_forward(fn, ln, ext):
     write(ext, into='Search Users')
     press(ENTER)
     loading()
-    select(ComboBox('Show:'), 'All')
-    if not Text(ln).exists():
+    if not Text(fn, below='Name').exists or not Text(ln, below='Name').exists:
+        write('', into='Search Users')
+        write(fn + ' ' + ln, into='Search Users')
+        press(ENTER)
+        loading()
+    try:
+        select(ComboBox('Show:'), 'All')
+    except exceptions.NoSuchElementException:
+        select(ComboBox('Show:'), '500')
+    if not Text(ln, below='Name').exists():
         try:
-            wait_until(Button(fn).exists)
-            wait_until(Button(fn).is_enabled, timeout_secs=60, interval_secs=.5)
-        except exceptions.TimeoutException as e:
+            wait_until(Button(fn, below='Name').exists)
+            wait_until(Button(fn, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
+        except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
+            print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
             print(e)
-        finally:
-            click(Button(fn))
+            return
+        else:
+            click(Button(fn, below='Name'))
     else:
         try:
-            wait_until(Button(ln).exists)
-            wait_until(Button(ln).is_enabled, timeout_secs=60, interval_secs=.5)
-        except exceptions.TimeoutException as e:
+            wait_until(Button(ln, below='Name').exists)
+            wait_until(Button(ln, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
+        except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
+            print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
             print(e)
-        finally:
-            click(Button(fn))
+            return
+        else:
+            click(Button(ln, below='Name'))
     loading()
     wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=60, interval_secs=.5)
     click('Call Handling & Forwarding')

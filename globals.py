@@ -9,7 +9,7 @@ def login():
     options = ChromeOptions()
     options.add_argument('--start-maximized')
     # Helium Config
-    Config.implicit_wait_secs = 120
+    Config.implicit_wait_secs = 240
     start_chrome('https://service.ringcentral.com/', options=options)
     try:
         wait_until(Text("Single Sign-on").exists)
@@ -42,7 +42,7 @@ def loading():
             print("Waiting for \'Loading...\' prompt to resolve")
             try:
                 wait_until(lambda: not Text("Loading...").exists(), timeout_secs=10, interval_secs=.5)
-            except exceptions as e:
+            except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
                 print(e)
                 time.sleep(3)
             else:
@@ -51,7 +51,7 @@ def loading():
             print("Waiting for \'Loading...\' alert to resolve")
             try:
                 wait_until(lambda: not Alert("Loading...").exists(), timeout_secs=10, interval_secs=.5)
-            except exceptions as e:
+            except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
                 print(e)
                 time.sleep(3)
             else:

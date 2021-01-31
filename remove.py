@@ -90,7 +90,7 @@ def remove(firstn, lastn, fulln, email, title, count, line):
         if userexists:
             validateext = False
             ext = Text(to_right_of=lastn, below='Number').value
-            while not validateext:
+            while not validateext:  # Note to future Julio: please fix this. Reading this is giving me anxiety.
                 confirm = input(
                     'Press ENTER to confirm that {0} is the correct extension for {1}. If not, input the correct Ext. '
                     'or enter [e] to exit').format(ext, regname)

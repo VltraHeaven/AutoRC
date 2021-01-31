@@ -1,60 +1,6 @@
-from helium import *
-import csv
 import argparse
 import sys
-import os
-from func import delete, assign, set_forward, login
-
-
-class Users:
-    def __init__(self, filepath):
-        self.filepath = filepath
-
-    def filecheck(self):
-        if not os.path.isfile(self.filepath):
-            sys.exit("The specified file does not exist.")
-
-    def newext(self):
-        self.filecheck()
-        login()
-        count = 0
-        with open(self.filepath) as usercount:
-            count_line = csv.DictReader(usercount)
-            for line_num in enumerate(count_line):
-                count += 1
-        print(str(count) + ' new extensions will be created.')
-
-        with open(self.filepath) as userlist:
-            reader = csv.DictReader(userlist)
-            for line_num, row in enumerate(reader):
-                nhfirstname = row['givenName']
-                nhlastname = row['surname']
-                nhdisplayname = row['name']
-                nhemail = row['emailAddress']
-                nhtitle = row['Title']
-                assignedext = assign(nhfirstname, nhlastname, nhdisplayname, nhemail, nhtitle, count, line_num)
-                if assignedext is not None:
-                    set_forward(nhfirstname, nhlastname, assignedext)
-                    del assignedext
-                print('Extension assignment and configuration for ' + nhdisplayname + ' complete.')
-        print('RingCentral accounts created successfully.')
-        kill_browser()
-
-    def delext(self):
-        self.filecheck()
-        login()
-        with open(self.filepath) as userlist:
-            reader = csv.DictReader(userlist)
-            for line_num, row in enumerate(reader):
-                nhfirstname = row['givenName']
-                nhlastname = row['surname']
-                nhdisplayname = row['name']
-                nhemail = row['emailAddress']
-                nhtitle = row['Title']
-                delete(nhfirstname, nhlastname, nhdisplayname, nhemail, nhtitle)
-                print('Extension removal for ' + nhdisplayname + ' complete.')
-        print('RingCentral accounts successfully removed.')
-        kill_browser()
+from users import Users
 
 
 if __name__ == "__main__":
@@ -82,7 +28,7 @@ if __name__ == "__main__":
             print(aparser.description)
         else:
             assign_init = Users(aparser.file)
-            assign_init.newext()
+            assign_init.new_ext()
             sys.exit(0)
     elif aparser.remove:
         if not aparser.file:
@@ -90,7 +36,7 @@ if __name__ == "__main__":
             print(aparser.description)
         else:
             remove_init = Users(aparser.file)
-            remove_init.delext()
+            remove_init.del_ext()
             sys.exit(0)
     else:
         print(aparser.usage + '\n' + aparser.description)

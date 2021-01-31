@@ -81,7 +81,7 @@ def set_forward(fn, ln, ext):
     write(ext, into='Search Users')
     press(ENTER)
     loading()
-    if not Text(fn, below='Name').exists or not Text(ln, below='Name').exists:
+    if not Text(fn, below='Name').exists or not Text(ln, below='Name').exists():
         write('', into='Search Users')
         write(fn + ' ' + ln, into='Search Users')
         press(ENTER)

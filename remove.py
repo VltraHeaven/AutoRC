@@ -23,7 +23,7 @@ def userdelete(name):
 
 # Navigates to assigned extensions, checks if a user's extension can be found, and returns true/false
 # Implement accordingly!
-def usercheck(extension, name):
+def usercheck(name):
     nav_assigned()
     loading()
     write('', into='Search Users')
@@ -31,14 +31,11 @@ def usercheck(extension, name):
     press(ENTER)
     loading()
     exists = False
-    if extension:
-        if Text(name, below='Name', to_left_of=extension).exists:
-            del exists
-            exists = True
-    elif extension is None:
-        if Text(name, below='Name').exists:
-            del exists
-            exists = True
+    if Text('No results').exists():
+        return exists
+    if Button(name, below='Name').exists():
+        del exists
+        exists = True
     return exists
 
 
@@ -63,11 +60,10 @@ def remove(firstn, lastn, fulln, email, title, count, line):
         return
     loading()
     if Text('Duplicate Email Association').exists():
-        loading()
         regname = Text(below='Name').value  # Get the full name as registered in RingCentral
         ext = Text(below='Ext.', to_right_of=regname).value
         print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
-        userexists = usercheck(ext, regname)
+        userexists = usercheck(regname)
         if not userexists:
             try:
                 print('There was an error removing ' + regname + '\'s extension.')
@@ -86,14 +82,14 @@ def remove(firstn, lastn, fulln, email, title, count, line):
         print('Unable to retrieve ' + fulln + '\'s extension using the email address. Will try to find the extension '
                                               'based on user\'s display name.')
         regname = fulln
-        userexists = usercheck(None, regname)
+        userexists = usercheck(regname)
         if userexists:
             validateext = False
-            ext = Text(to_right_of=lastn, below='Number').value
+            ext = Text(to_right_of=lastn, below='Ext').value
             while not validateext:  # Note to future Julio: please fix this. Reading this is giving me anxiety.
                 confirm = input(
-                    'Press ENTER to confirm that {0} is the correct extension for {1}. If not, input the correct Ext. '
-                    'or enter [e] to exit').format(ext, regname)
+                    'Press ENTER to confirm that ' + ext + ' is the correct extension for ' + regname +
+                    '. If not, input the correct extension or enter [e] to exit')
                 if confirm.strip('[]') == 'e' or confirm.strip('[]') == 'E':
                     kill_browser()
                     sys.exit('Exiting')
@@ -128,15 +124,15 @@ def remove(firstn, lastn, fulln, email, title, count, line):
         if enabled:
             userdisable(regname)
             del userexists
-            userexists = usercheck(ext, regname)
+            userexists = usercheck(regname)
         elif disabled:
             userdelete(regname)
             del userexists
-            userexists = usercheck(ext, regname)
+            userexists = usercheck(regname)
         elif inactive:
             userdelete(regname)
             del userexists
-            userexists = usercheck(ext, regname)
+            userexists = usercheck(regname)
         else:
             del userexists
-            userexists = usercheck(ext, regname)
+            userexists = usercheck(regname)

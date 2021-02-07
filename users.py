@@ -19,7 +19,7 @@ class Users:
         count = 0
         with open(self.filepath) as file:
             count_line = csv.DictReader(file)
-            for line_num in enumerate(count_line):
+            for _ in enumerate(count_line):
                 count += 1
         print(str(count) + ' extensions will be processed.')
         return count

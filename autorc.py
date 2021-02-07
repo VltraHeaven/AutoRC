@@ -1,10 +1,14 @@
 import argparse
 import sys
 from users import Users
+import os
+from helium import *
+import traceback
 
 
-if __name__ == "__main__":
-
+# Entrypoint
+def main():
+    # CLI Frontend  functionality
     def init_argparse() -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser(
             usage="python " + sys.argv[0] + " [-h] [-a | -r] [file]",
@@ -17,7 +21,6 @@ if __name__ == "__main__":
                             help='Path to the userlist .csv file.\nThe .csv must at least have the following '
                                  'case-sensitive headers: givenName,surname,name,emailAddress,Title\n')
         return parser
-
 
     init_args = init_argparse()
     aparser = init_args.parse_args()
@@ -38,5 +41,14 @@ if __name__ == "__main__":
             remove_init = Users(aparser.file)
             remove_init.del_ext()
             sys.exit(0)
+
     else:
         print(aparser.usage + '\n' + aparser.description)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt as e:
+        print('Keyboard Interrupt Detected: {0}'.format(e))
+        print(traceback.format_exc())
+        sys.exit(0)

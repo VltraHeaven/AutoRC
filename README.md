@@ -26,13 +26,13 @@ This program pulls it's user data from a list of users in a `.csv` that contains
 givenName,surname,name,emailAddress,Title 
 ```
 
-To assigning extensions to the users listed in a `.csv`
+Assign extensions to the users listed in a `.csv`
 
 ```
 python ./autorc.py --assign [file]
 ```
 
-Removing extensions from the users listed in a `.csv`
+Remove extensions of users listed in a `.csv`
 
 ```
 python ./autorc.py --remove [file]

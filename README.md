@@ -40,6 +40,14 @@ python ./autorc.py --remove [file]
 
 A Chrome browser window will open, browse to the RingCentral Single Sign-On page and wait until sign in is successful. Once the admin panel is visible it will continue automatically.
 
+## Roadmap
+---
+- Logging functionality
+- Exit browser for interrupts and unrecoverable exceptions
+- Command-line flag to toggle console output and control verbosity
+- Output results to text/csv
+- Resume after interrupts and unrecoverable exceptions
+
 Help
 ```
 python ./autorc.py -h

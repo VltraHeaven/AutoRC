@@ -3,16 +3,17 @@ import time
 from selenium.common import exceptions
 
 
+# Navigates directly to the Assigned Extensions web-page
 def nav_assigned():
     url = 'https://service.ringcentral.com/application/users/users/default'
     go_to(url)
 
-
+# Navigates directly to the Unassigned Extensions web-page
 def nav_unassigned():
     url = 'https://service.ringcentral.com/application/users/users/unassigned'
     go_to(url)
 
-
+# Waits until all prompts containing a "Loading..." string no longer exist on the webpage
 def loading():
     loaded = False
     while not loaded:

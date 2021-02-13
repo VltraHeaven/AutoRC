@@ -33,10 +33,12 @@ class Users:
             print('This script will continue when you have successfully accessed the Admin Portal.')
         wait_until(Text("Admin").exists, timeout_secs=120, interval_secs=.5)
 
+#   Confirms a file exists at the passed argument path
     def filecheck(self):
         if not os.path.isfile(self.filepath):
             sys.exit("The specified file does not exist.")
 
+#   Iterates over and counts each line of the passed csv
     def usercount(self):
         count = 0
         with open(self.filepath) as file:
@@ -46,6 +48,8 @@ class Users:
         print(str(count) + ' extensions will be processed.')
         return count
 
+#   Iterates over each line of passed csv assigns the value of each column to a variable, creates a new RingCentral
+#   extension and sets the required default extension forwarding settings
     def new_ext(self):
         self.filecheck()
         total = self.usercount()
@@ -65,6 +69,8 @@ class Users:
         print('RingCentral accounts created successfully.')
         kill_browser()
 
+#   Iterates over each line of passed csv assigns the value of each column to a variable and removes the
+#   assigned extension
     def del_ext(self):
         self.filecheck()
         total = self.usercount()

@@ -6,8 +6,8 @@ def available_ext(users_sum):
     need_ext = True
     while need_ext:
         nav_unassigned()
-        wait_until(TextField('Search Users').exists)
-        write('app', into='Search Users')
+        wait_until(TextField('Search').exists)
+        write('app', into='Search')
         press(ENTER)
         loading()
         select(ComboBox('Show:'), 'All')
@@ -21,7 +21,7 @@ def available_ext(users_sum):
             try:
                 confirm = input(
                     "There are no available extensions. Please purchase {0} extensions and enter any key to continue "
-                    "or [e] to exit").format(users_sum)
+                    "or [e] to exit".format(users_sum))
                 if confirm.strip('[]') == 'e' or confirm.strip('[]') == 'E':
                     kill_browser()
                     sys.exit('Exiting')
@@ -77,37 +77,51 @@ def assign(firstn, lastn, fulln, email, title, count, line):
 def set_forward(fn, ln, ext):
     nav_assigned()
     loading()
-    write('', into='Search Users')
-    write(ext, into='Search Users')
+    write('', into='Search')
+    write(ext, into='Search')
     press(ENTER)
     loading()
-    if not Text(fn, below='Name').exists or not Text(ln, below='Name').exists():
-        write('', into='Search Users')
-        write(fn + ' ' + ln, into='Search Users')
-        press(ENTER)
-        loading()
     try:
         select(ComboBox('Show:'), 'All')
     except exceptions.NoSuchElementException:
-        select(ComboBox('Show:'), '500')
-    if not Text(ln, below='Name').exists():
+        try:
+            select(ComboBox('Show:'), '500')
+        except exceptions.NoSuchElementException:
+            pass
+    if not Text(fn).exists() or not Text(ln).exists():
+        write('', into='Search')
+        write(fn + ' ' + ln, into='Search')
+        press(ENTER)
+        loading()
         try:
             wait_until(Button(fn, below='Name').exists)
             wait_until(Button(fn, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
-        except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
-            print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
-            print(e)
-            return
+        except exceptions.NoSuchElementException:
+            try:
+                wait_until(Button(ln, below='Name').exists)
+                wait_until(Button(ln, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
+            except exceptions.NoSuchElementException as e:
+                print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
+                print(e)
+                return
+            else:
+                click(Button(ln, below='Name'))
         else:
-            click(Button(fn, below='Name'))
+            click(Button(fn, below="Name"))
     else:
         try:
             wait_until(Button(ln, below='Name').exists)
             wait_until(Button(ln, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
-        except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
-            print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
-            print(e)
-            return
+        except exceptions.NoSuchElementException:
+            try:
+                wait_until(Button(fn, below='Name').exists)
+                wait_until(Button(fn, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
+            except exceptions.NoSuchElementException as e:
+                print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
+                print(e)
+                return
+            else:
+                click(Button(fn, below="Name"))
         else:
             click(Button(ln, below='Name'))
     loading()

@@ -4,12 +4,34 @@ import os
 import sys
 from assign import assign, set_forward
 from remove import remove
-from globals import login
+from selenium.webdriver import ChromeOptions
+from selenium.common import exceptions
+import time
 
 
 class Users:
     def __init__(self, filepath):
         self.filepath = filepath
+        # WebDriver setting
+        self.options = ChromeOptions()
+        self.options.add_argument('--start-maximized')
+        # Helium Config
+        self.config = Config
+        self.config.implicit_wait_secs = 240
+        self.exceptions = exceptions
+        start_chrome('https://service.ringcentral.com/', options=self.options)
+        try:
+            wait_until(Text("Single Sign-on").exists)
+            click('Single Sign-on')
+        except self.exceptions.TimeoutException or self.exceptions.StaleElementReferenceException or self.exceptions.NoSuchElementException:
+            print('Click the Single Sign-on button, enter your email address in the browser and click "Submit" to log '
+                  'into RingCentral.')
+            time.sleep(2)
+        else:
+            print('Enter your email address in the browser and click "Submit" to log into RingCentral.')
+        finally:
+            print('This script will continue when you have successfully accessed the Admin Portal.')
+        wait_until(Text("Admin").exists, timeout_secs=120, interval_secs=.5)
 
     def filecheck(self):
         if not os.path.isfile(self.filepath):
@@ -27,7 +49,6 @@ class Users:
     def new_ext(self):
         self.filecheck()
         total = self.usercount()
-        login()
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
             for line_num, row in enumerate(reader):
@@ -47,7 +68,6 @@ class Users:
     def del_ext(self):
         self.filecheck()
         total = self.usercount()
-        login()
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
             for line_num, row in enumerate(reader):

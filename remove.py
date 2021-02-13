@@ -26,8 +26,8 @@ def userdelete(name):
 def usercheck(name):
     nav_assigned()
     loading()
-    write('', into='Search Users')
-    write(name, into='Search Users')
+    write('', into='Search')
+    write(name, into='Search')
     press(ENTER)
     loading()
     exists = False
@@ -45,9 +45,10 @@ def remove(firstn, lastn, fulln, email, title, count, line):
     nav_unassigned()
     print('Checking for ' + fulln + '\'s assigned RingCentral Extension, please wait...')
     loading()
-    write('Ext', into='Search Users')
+    write('Ext', into='Search')
     press(ENTER)
-    click(Button(below='Name'))
+    loading()
+    click(Button("Ext", below="Name"))
     loading()
     write(email, into='Email Address')
     write(firstn, into='First Name')
@@ -60,9 +61,9 @@ def remove(firstn, lastn, fulln, email, title, count, line):
         return
     loading()
     if Text('Duplicate Email Association').exists():
-        regname = Text(below='Name').value  # Get the full name as registered in RingCentral
-        ext = Text(below='Ext.', to_right_of=regname).value
-        print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
+        ext = Text(below='Ext', to_left_of=email).value
+        regname = Text(below='Name', to_left_of=ext).value  # Get the full name as registered in RingCentral
+        print(regname + ' is assigned extension ' + ext + '. Unassigning...')
         userexists = usercheck(regname)
         if not userexists:
             try:
@@ -87,7 +88,7 @@ def remove(firstn, lastn, fulln, email, title, count, line):
             validateext = False
             ext = Text(to_right_of=lastn, below='Ext').value
             while not validateext:  # Note to future Julio: please fix this. Reading this is giving me anxiety.
-                confirm = input(
+                confirm = input(    # Note to past Julio: leave more specific comments next time, dummy. - Future Julio
                     'Press ENTER to confirm that ' + ext + ' is the correct extension for ' + regname +
                     '. If not, input the correct extension or enter [e] to exit')
                 if confirm.strip('[]') == 'e' or confirm.strip('[]') == 'E':

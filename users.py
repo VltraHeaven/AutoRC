@@ -61,11 +61,10 @@ class Users:
                 displayname = row['name']
                 email = row['emailAddress']
                 title = row['Title']
-                assignedext = assign(firstname, lastname, displayname, email, title, total, line_num)
-                if assignedext is not None:
-                    set_forward(firstname, lastname, assignedext)
-                    del assignedext
-                print('Extension assignment and configuration for ' + displayname + ' complete.')
+                name, ext = assign(firstname, lastname, displayname, email, title, total, line_num)
+                if name is not None and ext is not None:
+                    set_forward(name, ext)
+                print('Extension assignment and configuration for ' + name + ' complete.')
         print('RingCentral accounts created successfully.')
         kill_browser()
 

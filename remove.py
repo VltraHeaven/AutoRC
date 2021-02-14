@@ -1,5 +1,8 @@
 from globals import *
 import sys
+import log
+
+pnl = log.print_and_log
 
 
 def userdisable(name):
@@ -41,9 +44,9 @@ def usercheck(name):
 
 def remove(firstn, lastn, fulln, email, title, count, line):
     remaining_users = count - line
-    print(str(remaining_users) + ' extensions remaining to be removed')
+    pnl(str(remaining_users) + ' extensions remaining to be removed')
     nav_unassigned()
-    print('Checking for ' + fulln + '\'s assigned RingCentral Extension, please wait...')
+    pnl('Checking for ' + fulln + '\'s assigned RingCentral Extension, please wait...')
     loading()
     write('Ext', into='Search')
     press(ENTER)
@@ -57,30 +60,30 @@ def remove(firstn, lastn, fulln, email, title, count, line):
     if Button('Verify Email Uniqueness').is_enabled():
         click(Button('Verify Email Uniqueness'))
     else:
-        print(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
+        pnl(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
         return
     loading()
     if Text('Duplicate Email Association').exists():
         ext = Text(below='Ext', to_left_of=email).value
         regname = Text(below='Name', to_left_of=ext).value  # Get the full name as registered in RingCentral
-        print(regname + ' is assigned extension ' + ext + '. Unassigning...')
+        pnl(regname + ' is assigned extension ' + ext + '. Unassigning...')
         userexists = usercheck(regname)
         if not userexists:
             try:
-                print('There was an error removing ' + regname + '\'s extension.')
+                pnl('There was an error removing ' + regname + '\'s extension.')
                 confirm = input('Try removing this user manually and enter any key to continue or [e] to exit.')
                 if confirm == 'e'.strip('[]') or confirm == 'E'.strip('[]'):
                     kill_browser()
                     sys.exit('Exiting')
                 else:
-                    print('Continuing to the next entry')
+                    pnl('Continuing to the next entry')
             except exceptions.TimeoutException:
-                print('Waiting for confirmation timed out. Continuing to the next entry')
+                pnl('Waiting for confirmation timed out. Continuing to the next entry')
             finally:
                 return
     elif Text('Email address is already in use.').exists():
         loading()
-        print('Unable to retrieve ' + fulln + '\'s extension using the email address. Will try to find the extension '
+        pnl('Unable to retrieve ' + fulln + '\'s extension using the email address. Will try to find the extension '
                                               'based on user\'s display name.')
         regname = fulln
         userexists = usercheck(regname)
@@ -97,28 +100,28 @@ def remove(firstn, lastn, fulln, email, title, count, line):
                 elif not confirm:
                     validateext = True
                 elif not isinstance(confirm, int):
-                    print('Please input a valid number value')
+                    pnl('Please input a valid number value')
                 else:
                     del ext
                     ext = confirm
-            print(fulln + ' is assigned extension ' + ext + '. Unassigning...')
+            pnl(fulln + ' is assigned extension ' + ext + '. Unassigning...')
         else:
-            print(fulln + ' not found. Skipping...')
+            pnl(fulln + ' not found. Skipping...')
             return
     else:
-        print(fulln + ' does not have an assigned extension.')
+        pnl(fulln + ' does not have an assigned extension.')
         return
 
     deletetry = 0
     while userexists:
         deletetry += 1
         if deletetry >= 6:
-            print(
+            pnl(
                 'Maximum attempts for account removal failed. Please manually delete ' + regname + ', Ext. ' + ext + ' from RingCentral.')
             break
-        print('Account removal attempt ' + str(deletetry) + ' out of 5.')
+        pnl('Account removal attempt ' + str(deletetry) + ' out of 5.')
         if deletetry == 5:
-            print('Final account removal attempt for ' + regname + '...')
+            pnl('Final account removal attempt for ' + regname + '...')
         enabled = find_all(S('.rc-icon-user-enabled', to_left_of=regname))
         disabled = find_all(S('.rc-icon-user-disabled', to_left_of=regname))
         inactive = find_all(S('.rc-icon-not-activated', to_left_of=regname))

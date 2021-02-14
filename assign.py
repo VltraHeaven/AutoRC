@@ -1,5 +1,8 @@
 from globals import *
 import sys
+import log
+
+pnl = log.print_and_log
 
 
 def available_ext(users_sum):
@@ -12,10 +15,10 @@ def available_ext(users_sum):
         loading()
         select(ComboBox('Show:'), 'All')
         loading()
-        print('Checking for available extensions')
+        pnl('Checking for available extensions')
         total_ext = int(Text('Total: ').value.strip('Total: '))
         if total_ext > 0:
-            print(str(users_sum) + ' users remaining and ' + str(total_ext) + ' available RingCentral extensions')
+            pnl(str(users_sum) + ' users remaining and ' + str(total_ext) + ' available RingCentral extensions')
             need_ext = False
         else:
             try:
@@ -31,7 +34,7 @@ def available_ext(users_sum):
 
 def assign(firstn, lastn, fulln, email, title, count, line):
     remaining_users = count - line
-    print('Assigning ' + fulln + ' a RingCentral Extension, please wait...')
+    pnl('Assigning ' + fulln + ' a RingCentral Extension, please wait...')
     available_ext(remaining_users)
     loading()
     try:
@@ -49,13 +52,13 @@ def assign(firstn, lastn, fulln, email, title, count, line):
         click(Button('Verify Email Uniqueness'))
         loading()
     else:
-        print(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
+        pnl(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
         return
 
     if Text('Duplicate Email Association').exists():
         ext = Text(below='Ext', to_left_of=email).value
         fulln = Text(below='Name', to_left_of=ext).value
-        print(fulln + ' has already been assigned extension ' + ext)
+        pnl(fulln + ' has already been assigned extension ' + ext)
         return fulln, ext
 
     else:
@@ -71,7 +74,7 @@ def assign(firstn, lastn, fulln, email, title, count, line):
     loading()
     click(Text('Save'))
     loading()
-    print('{0} has been assigned RingCentral Extension: {1}'.format(fulln, ext))
+    pnl('{0} has been assigned RingCentral Extension: {1}'.format(fulln, ext))
     return fulln, ext
 
 
@@ -96,11 +99,11 @@ def set_forward(name, ext):
         try:
             number = Text(to_left_of=ext, below='Number').value
         except exceptions.NoSuchElementException:
-            print("Unable to capture {0}\'s RingCentral number.".format(name))
+            pnl("Unable to capture {0}\'s RingCentral number.".format(name))
             number = input("Please type in the value under the 'Number' column for this user. Format: (000) "
                            "000-0000")
         else:
-            print("{0}\'s number is {1}".format(name, number))
+            pnl("{0}\'s number is {1}".format(name, number))
 
     click(Button(name, to_left_of=number))
     loading()
@@ -114,7 +117,7 @@ def set_forward(name, ext):
             wait_until(ComboBox('Ring For', to_left_of='Desktop').exists, timeout_secs=60, interval_secs=.5)
             current_rings = ComboBox('Ring For').value
         except exceptions.StaleElementReferenceException as e:
-            print(e)
+            pnl(e)
             continue
         if current_rings != max_rings:
             select(ComboBox('Ring For'), max_rings)
@@ -126,5 +129,5 @@ def set_forward(name, ext):
             loading()
         else:
             rings_set = True
-    print('Forwarding settings for {0} have been set.'.format(name))
+    pnl('Forwarding settings for {0} have been set.'.format(name))
     del ext

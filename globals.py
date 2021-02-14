@@ -1,7 +1,10 @@
 from helium import *
 import time
 from selenium.common import exceptions
+import log
+import logging
 
+pnl = log.print_and_log
 
 # Navigates directly to the Assigned Extensions web-page
 def nav_assigned():
@@ -18,25 +21,25 @@ def loading():
     loaded = False
     while not loaded:
         if Text("Loading").exists():
-            print("Waiting for \'Loading...\' prompt to resolve")
+            pnl("Waiting for \'Loading...\' prompt to resolve")
             try:
                 wait_until(lambda: not Text("Loading...").exists(), timeout_secs=10, interval_secs=.5)
             except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
-                print(e)
+                pnl(e)
                 time.sleep(2)
             else:
                 time.sleep(2)
         elif Alert("Loading").exists():
-            print("Waiting for \'Loading...\' alert to resolve")
+            pnl("Waiting for \'Loading...\' alert to resolve")
             try:
                 wait_until(lambda: not Alert("Loading...").exists(), timeout_secs=10, interval_secs=.5)
             except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
-                print(e)
+                pnl(e)
                 time.sleep(2)
             else:
                 time.sleep(2)
         else:
-            # print("Loading the RingCentral Webpage")
+            # pnl("Loading the RingCentral Webpage")
             del loaded
             loaded = True
             time.sleep(2)

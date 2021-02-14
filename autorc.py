@@ -1,9 +1,9 @@
 import argparse
 import sys
 from users import Users
-import os
-from helium import *
 import traceback
+import log
+import logging
 
 
 # Entrypoint
@@ -50,6 +50,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt as e:
-        print('Keyboard Interrupt Detected: {0}'.format(e))
-        print(traceback.format_exc())
+        pnl = log.print_and_log
+        pnl('Keyboard Interrupt Detected: {0}'.format(e))
+        pnl(traceback.format_exc())
+        logging.shutdown()
         sys.exit(0)

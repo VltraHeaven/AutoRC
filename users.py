@@ -7,6 +7,8 @@ from remove import remove
 from selenium.webdriver import ChromeOptions
 from selenium.common import exceptions
 import time
+import log
+import logging
 
 
 class Users:
@@ -19,6 +21,7 @@ class Users:
         self.config = Config
         self.config.implicit_wait_secs = 240
         self.exceptions = exceptions
+        self.pnl = log.print_and_log
         start_chrome('https://service.ringcentral.com/', options=self.options)
         try:
             wait_until(Text("Single Sign-on").exists)
@@ -33,23 +36,24 @@ class Users:
             print('This script will continue when you have successfully accessed the Admin Portal.')
         wait_until(Text("Admin").exists, timeout_secs=120, interval_secs=.5)
 
-#   Confirms a file exists at the passed argument path
+    #   Confirms a file exists at the passed argument path
     def filecheck(self):
         if not os.path.isfile(self.filepath):
-            sys.exit("The specified file does not exist.")
+            self.pnl("The specified file does not exist.")
+            sys.exit()
 
-#   Iterates over and counts each line of the passed csv
+    #   Iterates over and counts each line of the passed csv
     def usercount(self):
         count = 0
         with open(self.filepath) as file:
             count_line = csv.DictReader(file)
             for _ in enumerate(count_line):
                 count += 1
-        print(str(count) + ' extensions will be processed.')
+        self.pnl(str(count) + ' extensions will be processed.')
         return count
 
-#   Iterates over each line of passed csv assigns the value of each column to a variable, creates a new RingCentral
-#   extension and sets the required default extension forwarding settings
+    #   Iterates over each line of passed csv assigns the value of each column to a variable, creates a new RingCentral
+    #   extension and sets the required default extension forwarding settings
     def new_ext(self):
         self.filecheck()
         total = self.usercount()
@@ -64,12 +68,13 @@ class Users:
                 name, ext = assign(firstname, lastname, displayname, email, title, total, line_num)
                 if name is not None and ext is not None:
                     set_forward(name, ext)
-                print('Extension assignment and configuration for ' + name + ' complete.')
-        print('RingCentral accounts created successfully.')
+                self.pnl('Extension assignment and configuration for ' + name + ' complete.')
+        self.pnl('RingCentral accounts created successfully.')
         kill_browser()
+        logging.shutdown()
 
-#   Iterates over each line of passed csv assigns the value of each column to a variable and removes the
-#   assigned extension
+    #   Iterates over each line of passed csv assigns the value of each column to a variable and removes the
+    #   assigned extension
     def del_ext(self):
         self.filecheck()
         total = self.usercount()
@@ -82,6 +87,7 @@ class Users:
                 email = row['emailAddress']
                 title = row['Title']
                 remove(firstname, lastname, displayname, email, title, total, line_num)
-                print('Extension removal for ' + displayname + ' complete.')
-        print('RingCentral accounts successfully removed.')
+                self.pnl('Extension removal for ' + displayname + ' complete.')
+        self.pnl('RingCentral accounts successfully removed.')
         kill_browser()
+        logging.shutdown()

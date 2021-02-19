@@ -56,10 +56,10 @@ def assign(firstn, lastn, fulln, email, title, count, line):
         return
 
     if Text('Duplicate Email Association').exists():
-        ext = Text(below='Ext', to_left_of=email).value
-        fulln = Text(below='Name', to_left_of=ext).value
-        pnl(fulln + ' has already been assigned extension ' + ext)
-        return fulln, ext
+        ext = grab_table_value("Ext")
+        fulln = grab_table_value("Name")
+        pnl('{0} has already been assigned extension {1}'.format(fulln[0], ext[0]))
+        return fulln[0], ext[0]
 
     else:
         click(Button('OK'))
@@ -93,19 +93,18 @@ def set_forward(name, ext):
     write(name, into='Search')
     press(ENTER)
     loading()
-
     number = False
     while not number:
         try:
-            number = Text(to_left_of=ext, below='Number').value
+            number = grab_table_value("Number")
         except exceptions.NoSuchElementException:
             pnl("Unable to capture {0}\'s RingCentral number.".format(name))
             number = input("Please type in the value under the 'Number' column for this user. Format: (000) "
                            "000-0000")
         else:
-            pnl("{0}\'s number is {1}".format(name, number))
+            pnl("{0}\'s number is {1}".format(name, number[0]))
 
-    click(Button(name, to_left_of=number))
+    click(Button(name, to_left_of=number[0]))
     loading()
     wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=60, interval_secs=.5)
     click('Call Handling & Forwarding')

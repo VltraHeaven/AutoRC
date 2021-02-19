@@ -2,19 +2,21 @@ from helium import *
 import time
 from selenium.common import exceptions
 import log
-import logging
 
 pnl = log.print_and_log
+
 
 # Navigates directly to the Assigned Extensions web-page
 def nav_assigned():
     url = 'https://service.ringcentral.com/application/users/users/default'
     go_to(url)
 
+
 # Navigates directly to the Unassigned Extensions web-page
 def nav_unassigned():
     url = 'https://service.ringcentral.com/application/users/users/unassigned'
     go_to(url)
+
 
 # Waits until all prompts containing a "Loading..." string no longer exist on the webpage
 def loading():
@@ -44,3 +46,8 @@ def loading():
             loaded = True
             time.sleep(2)
 
+
+def grab_table_value(header):
+    table_cells = find_all(S("table > tbody > tr > td > span", below=header))
+    cell_values = [cell.web_element.text for cell in table_cells]
+    return cell_values

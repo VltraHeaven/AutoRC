@@ -1,5 +1,8 @@
 from globals import *
 import sys
+import log
+
+pnl = log.print_and_log
 
 
 def available_ext(users_sum):
@@ -12,10 +15,10 @@ def available_ext(users_sum):
         loading()
         select(ComboBox('Show:'), 'All')
         loading()
-        print('Checking for available extensions')
+        pnl('Checking for available extensions')
         total_ext = int(Text('Total: ').value.strip('Total: '))
         if total_ext > 0:
-            print(str(users_sum) + ' users remaining and ' + str(total_ext) + ' available RingCentral extensions')
+            pnl(str(users_sum) + ' users remaining and ' + str(total_ext) + ' available RingCentral extensions')
             need_ext = False
         else:
             try:
@@ -31,7 +34,7 @@ def available_ext(users_sum):
 
 def assign(firstn, lastn, fulln, email, title, count, line):
     remaining_users = count - line
-    print('Assigning ' + fulln + ' a RingCentral Extension, please wait...')
+    pnl('Assigning ' + fulln + ' a RingCentral Extension, please wait...')
     available_ext(remaining_users)
     loading()
     try:
@@ -49,13 +52,14 @@ def assign(firstn, lastn, fulln, email, title, count, line):
         click(Button('Verify Email Uniqueness'))
         loading()
     else:
-        print(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
+        pnl(fulln + ' <' + email + '>' + ' does not have a valid email address. Skipping...')
         return
 
     if Text('Duplicate Email Association').exists():
-        ext = Text(below='Ext', to_left_of=email).value
-        print(fulln + ' has already been assigned extension ' + ext)
-        return ext
+        ext = grab_table_value("Ext")
+        fulln = grab_table_value("Name")
+        pnl('{0} has already been assigned extension {1}'.format(fulln[0], ext[0]))
+        return fulln[0], ext[0]
 
     else:
         click(Button('OK'))
@@ -70,16 +74,12 @@ def assign(firstn, lastn, fulln, email, title, count, line):
     loading()
     click(Text('Save'))
     loading()
-    print('{0} has been assigned RingCentral Extension: {1}'.format(fulln, ext))
-    return ext
+    pnl('{0} has been assigned RingCentral Extension: {1}'.format(fulln, ext))
+    return fulln, ext
 
 
-def set_forward(fn, ln, ext):
+def set_forward(name, ext):
     nav_assigned()
-    loading()
-    write('', into='Search')
-    write(ext, into='Search')
-    press(ENTER)
     loading()
     try:
         select(ComboBox('Show:'), 'All')
@@ -88,42 +88,35 @@ def set_forward(fn, ln, ext):
             select(ComboBox('Show:'), '500')
         except exceptions.NoSuchElementException:
             pass
-    if not Text(fn).exists() or not Text(ln).exists():
+    loading()
+    write('', into='Search')
+    write(name, into='Search')
+    press(ENTER)
+    loading()
+    name_check = grab_table_value("Name")
+    if not name_check:
         write('', into='Search')
-        write(fn + ' ' + ln, into='Search')
+        write(ext, into='Search')
         press(ENTER)
         loading()
+        name_check = grab_table_value("Name")
+        if not name_check:
+            print("Was unable to set forwarding options for {0}, please set this user's forwarding options manually.".format(name))
+            return
+
+    number = False
+    while not number:
         try:
-            wait_until(Button(fn, below='Name').exists)
-            wait_until(Button(fn, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
+            n = grab_table_value("Number")
+            num = n[0]
         except exceptions.NoSuchElementException:
-            try:
-                wait_until(Button(ln, below='Name').exists)
-                wait_until(Button(ln, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
-            except exceptions.NoSuchElementException as e:
-                print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
-                print(e)
-                return
-            else:
-                click(Button(ln, below='Name'))
-        else:
-            click(Button(fn, below="Name"))
-    else:
-        try:
-            wait_until(Button(ln, below='Name').exists)
-            wait_until(Button(ln, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
-        except exceptions.NoSuchElementException:
-            try:
-                wait_until(Button(fn, below='Name').exists)
-                wait_until(Button(fn, below='Name').is_enabled, timeout_secs=60, interval_secs=.5)
-            except exceptions.NoSuchElementException as e:
-                print('Forwarding settings for ' + fn + ' ' + ln + ' could not be set')
-                print(e)
-                return
-            else:
-                click(Button(fn, below="Name"))
-        else:
-            click(Button(ln, below='Name'))
+            pnl("Unable to capture {0}\'s RingCentral number.".format(name))
+            num = input("Please type in the value under the 'Number' column for this user. Format: (000) "
+                           "000-0000")
+        finally:
+            pnl("{0}\'s number is {1}".format(name, num))
+
+    click(Button(name, to_left_of=num))
     loading()
     wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=60, interval_secs=.5)
     click('Call Handling & Forwarding')
@@ -135,7 +128,7 @@ def set_forward(fn, ln, ext):
             wait_until(ComboBox('Ring For', to_left_of='Desktop').exists, timeout_secs=60, interval_secs=.5)
             current_rings = ComboBox('Ring For').value
         except exceptions.StaleElementReferenceException as e:
-            print(e)
+            pnl(e)
             continue
         if current_rings != max_rings:
             select(ComboBox('Ring For'), max_rings)
@@ -147,5 +140,5 @@ def set_forward(fn, ln, ext):
             loading()
         else:
             rings_set = True
-    print('Forwarding settings for {0} {1} have been set.'.format(fn, ln))
+    pnl('Forwarding settings for {0} have been set.'.format(name))
     del ext

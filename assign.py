@@ -93,18 +93,30 @@ def set_forward(name, ext):
     write(name, into='Search')
     press(ENTER)
     loading()
+    name_check = grab_table_value("Name")
+    if not name_check:
+        write('', into='Search')
+        write(ext, into='Search')
+        press(ENTER)
+        loading()
+        name_check = grab_table_value("Name")
+        if not name_check:
+            print("Was unable to set forwarding options for {0}, please set this user's forwarding options manually.".format(name))
+            return
+
     number = False
     while not number:
         try:
-            number = grab_table_value("Number")
+            n = grab_table_value("Number")
+            num = n[0]
         except exceptions.NoSuchElementException:
             pnl("Unable to capture {0}\'s RingCentral number.".format(name))
-            number = input("Please type in the value under the 'Number' column for this user. Format: (000) "
+            num = input("Please type in the value under the 'Number' column for this user. Format: (000) "
                            "000-0000")
-        else:
-            pnl("{0}\'s number is {1}".format(name, number[0]))
+        finally:
+            pnl("{0}\'s number is {1}".format(name, num))
 
-    click(Button(name, to_left_of=number[0]))
+    click(Button(name, to_left_of=num))
     loading()
     wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=60, interval_secs=.5)
     click('Call Handling & Forwarding')

@@ -93,19 +93,17 @@ def set_forward(name, ext):
     write(name, into='Search')
     press(ENTER)
     loading()
-    name_check = grab_table_value("Name")
-    if not name_check:
+    if not Button(name).exists():
         write('', into='Search')
         write(ext, into='Search')
         press(ENTER)
         loading()
-        name_check = grab_table_value("Name")
-        if not name_check:
+        if not Button(name).exists():
             print("Was unable to set forwarding options for {0}, please set this user's forwarding options manually.".format(name))
             return
 
-    number = False
-    while not number:
+    num = False
+    while not num:
         try:
             n = grab_table_value("Number")
             num = n[0]
@@ -115,8 +113,9 @@ def set_forward(name, ext):
                            "000-0000")
         finally:
             pnl("{0}\'s number is {1}".format(name, num))
+            continue
 
-    click(Button(name, to_left_of=num))
+    click(Button(name))
     loading()
     wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=60, interval_secs=.5)
     click('Call Handling & Forwarding')

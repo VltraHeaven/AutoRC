@@ -12,7 +12,7 @@ Automated Browser-driven RingCentral Account Management
 
 ## Setup
 
-Run from within the project folder/directory to install dependencies
+Run the following command from within the project folder/directory to install dependencies
 
 ```
 python -m pip -r requirements.txt
@@ -22,10 +22,10 @@ python -m pip -r requirements.txt
 
 This program pulls user data from a list of users in a `.csv` that contains the following case-sensitive headers
 ```
-givenName,surname,name,emailAddress,Title,Departmentthu 
+givenName,surname,name,emailAddress,Title,Department 
 ```
 
-Assigning extensions to the users listed in a `.csv`
+Assigning new extensions to the users listed in a `.csv`
 
 ```
 python ./autorc.py --assign [file]
@@ -41,6 +41,7 @@ A Chrome browser window will open, browse to the RingCentral Single Sign-On page
 
 ## Roadmap
 
+- ~~Add DEBUG level logging functionality~~
 - ~~Exit browser for interrupts and unrecoverable exceptions~~
 - Command-line flag to toggle console output and control verbosity
 - Output results to text/csv
@@ -55,7 +56,7 @@ usage: Usage: ./autorc.py [-h] [-a | -r] [file]
 Description: Automatically assign or remove RingCentral extensions.
 
 positional arguments:
-  file          Path to the userlist .csv file. The .csv must at least have the following case-sensitive headers: givenName,surname,name,emailAddress,Title
+  file          Path to the 'userlist.csv'. This .csv must at least have the following case-sensitive headers: givenName,surname,name,emailAddress,Title,Department
 
 optional arguments:
   -h, --help    show this help message and exit

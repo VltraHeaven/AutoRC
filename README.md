@@ -2,7 +2,7 @@
 
 Automated Browser-driven RingCentral Account Management
 
-## Dependenciens
+## Dependencies
 ---
 - [Python3](https://www.python.org/downloads/)
 - [Helium](https://github.com/mherrmann/selenium-python-helium)

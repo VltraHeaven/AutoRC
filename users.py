@@ -57,7 +57,7 @@ class Users:
     def new_ext(self):
         self.filecheck()
         total = self.usercount()
-        extensions = {}
+        result = {}
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
             for line_num, row in enumerate(reader):
@@ -67,21 +67,21 @@ class Users:
                     num = set_forward(name, ext)
                     if name and ext and num:
                         number = '{0}, {1}'.format(num, ext)
-                        extensions[name] = number
+                        result[name] = number
                     elif name and num:
-                        extensions[name] = num
+                        result[name] = num
                     elif name and ext:
-                        extensions[name] = '{0}, set forwarding configuration manually'.format(ext)
+                        result[name] = '{0}, set forwarding configuration manually'.format(ext)
                     else:
-                        extensions[name] = "Extension assignment failed"
+                        result[name] = "Extension assignment failed"
                     self.pnl('Extension assignment and configuration for {0} successful.'.format(name))
                 else:
-                    extensions[row["name"]] = "Extension assignment failed"
+                    result[row["name"]] = "Extension assignment failed"
         self.pnl('RingCentral accounts created successfully.')
         entry = 0
-        for key, value in extensions.items():
+        for key, value in result.items():
             entry += 1
-            self.pnl('{0}. Name: {1}, Phone Number: {2}'.format(entry, key, value))
+            self.pnl('{0}. Name: {1}, Extension: {2}'.format(entry, key, value))
         kill_browser()
 
     #   Iterates over each line of passed csv assigns the value of each column to a variable and removes the
@@ -89,15 +89,16 @@ class Users:
     def del_ext(self):
         self.filecheck()
         total = self.usercount()
+        result = {}
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
             for line_num, row in enumerate(reader):
-                firstname = row['givenName']
-                lastname = row['surname']
-                displayname = row['name']
-                email = row['emailAddress']
-                title = row['Title']
-                remove(firstname, lastname, displayname, email, title, total, line_num)
-                self.pnl('Extension removal for ' + displayname + ' complete.')
+                name, ext = remove(row, total, line_num)
+                result[name] = ext
+                self.pnl('Extension removal for {0} complete.'.format(name))
         self.pnl('RingCentral accounts successfully removed.')
+        entry = 0
+        for key, value in result.items():
+            entry += 1
+            self.pnl('{0}. Name: {1}, Extension: {2}'.format(entry, key, value))
         kill_browser()

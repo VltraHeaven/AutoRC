@@ -32,6 +32,7 @@ def main():
         else:
             assign_init = Users(aparser.file)
             assign_init.new_ext()
+            logging.shutdown()
             sys.exit(0)
     elif aparser.remove:
         if not aparser.file:
@@ -40,6 +41,7 @@ def main():
         else:
             remove_init = Users(aparser.file)
             remove_init.del_ext()
+            logging.shutdown()
             sys.exit(0)
 
     else:

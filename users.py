@@ -49,7 +49,7 @@ class Users:
             count_line = csv.DictReader(file)
             for _ in enumerate(count_line):
                 count += 1
-        self.pnl(str(count) + ' extensions will be processed.')
+        self.pnl('{0} extensions will be processed.'.format(str(count)))
         return count
 
     #   Iterates over each line of passed csv assigns the value of each column to a variable, creates a new RingCentral
@@ -57,21 +57,32 @@ class Users:
     def new_ext(self):
         self.filecheck()
         total = self.usercount()
+        extensions = {}
         with open(self.filepath) as userlist:
             reader = csv.DictReader(userlist)
             for line_num, row in enumerate(reader):
-                firstname = row['givenName']
-                lastname = row['surname']
-                displayname = row['name']
-                email = row['emailAddress']
-                title = row['Title']
-                name, ext = assign(firstname, lastname, displayname, email, title, total, line_num)
-                if name is not None and ext is not None:
-                    set_forward(name, ext)
-                self.pnl('Extension assignment and configuration for ' + name + ' complete.')
+                # row keys: ['givenName'], ['surname'], ['name'], ['emailAddress'], ['Title'], ['Department']
+                name, ext = assign(row, total, line_num)
+                if name:
+                    num = set_forward(name, ext)
+                    if name and ext and num:
+                        number = '{0}, {1}'.format(num, ext)
+                        extensions[name] = number
+                    elif name and num:
+                        extensions[name] = num
+                    elif name and ext:
+                        extensions[name] = '{0}, set forwarding configuration manually'.format(ext)
+                    else:
+                        extensions[name] = "Extension assignment failed"
+                    self.pnl('Extension assignment and configuration for {0} successful.'.format(name))
+                else:
+                    extensions[row["name"]] = "Extension assignment failed"
         self.pnl('RingCentral accounts created successfully.')
+        entry = 0
+        for key, value in extensions.items():
+            entry += 1
+            self.pnl('{0}. Name: {1}, Phone Number: {2}'.format(entry, key, value))
         kill_browser()
-        logging.shutdown()
 
     #   Iterates over each line of passed csv assigns the value of each column to a variable and removes the
     #   assigned extension
@@ -90,4 +101,3 @@ class Users:
                 self.pnl('Extension removal for ' + displayname + ' complete.')
         self.pnl('RingCentral accounts successfully removed.')
         kill_browser()
-        logging.shutdown()

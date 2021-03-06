@@ -41,37 +41,37 @@ def usercheck(name):
         return exists
 
 
-def remove(firstn, lastn, fulln, email, title, count, line):
+def remove(data, count, line):
     remaining_users = count - line
     pnl('{0} extensions remaining to be removed'.format(remaining_users))
     nav_unassigned()
-    pnl('Checking for {0}\'s assigned RingCentral Extension, please wait...'.format(fulln))
+    full_name = data['name']
+    email = data['emailAddress']
+    pnl('Checking for {0}\'s assigned RingCentral Extension, please wait...'.format(full_name))
     loading()
     write('Ext', into='Search')
     press(ENTER)
     loading()
     click(Button("Ext", below="Name"))
     loading()
-    write(email, into='Email Address')
-    write(firstn, into='First Name')
-    write(lastn, into='Last Name')
-    write(title, into='Job Title')
+    write(data['emailAddress'], into='Email Address')
     if Button('Verify Email Uniqueness').is_enabled():
         click(Button('Verify Email Uniqueness'))
     else:
-        pnl('{0} <{1}> does not have a valid email address. Skipping...'.format(fulln, email))
-        return
+        pnl('{0} <{1}> does not have a valid email address. Skipping...'.format(full_name, email))
+        ext = "No results found"
+        return full_name, ext
     loading()
     if Text('Duplicate Email Association').exists():
         e = grab_table_value("Ext")
         ext = e[0]
         fn = grab_table_value("Name")  # Get the full name as registered in RingCentral
-        fulln = fn[0]
-        pnl('{0} is assigned extension {1}. Unassigning...'.format(fulln, ext))
-        userexists = usercheck(fulln)
+        full_name = fn[0]
+        pnl('{0} is assigned extension {1}. Unassigning...'.format(full_name, ext))
+        userexists = usercheck(full_name)
         if not userexists:
             try:
-                pnl('There was an error removing {0}\'s extension.'.format(fulln))
+                pnl('There was an error removing {0}\'s extension.'.format(full_name))
                 confirm = input('Try removing this user manually and enter any key to continue or [e] to exit.')
                 if confirm == 'e'.strip('[]') or confirm == 'E'.strip('[]'):
                     kill_browser()
@@ -85,58 +85,60 @@ def remove(firstn, lastn, fulln, email, title, count, line):
     elif Text('Email address is already in use.').exists():
         loading()
         pnl('Unable to retrieve {0}\'s extension using the email address. Will try to find the extension '
-            'based on user\'s display name.'.format(fulln))
-        userexists = usercheck(fulln)
+            'based on user\'s display name.'.format(full_name))
+        userexists = usercheck(full_name)
         if userexists:
             validateext = False
-            ext = Text(to_right_of=lastn, below='Ext').value
+            ext = Text(to_right_of=Button(full_name), below='Ext').value
             while not validateext:  # Note to future Julio: please fix this. Reading this is giving me anxiety.
                 confirm = input(  # Note to past Julio: leave more specific comments next time, dummy. - Future Julio
                     'Press ENTER to confirm that {0} is the correct extension for {1}. If not, input the correct '
-                    'extension or enter [e] to exit'.format(ext, fulln))
-                if confirm.strip('[]') == 'e' or confirm.strip('[]') == 'E':
-                    kill_browser()
-                    sys.exit('Exiting')
+                    'extension or [s] to skip this user.'.format(ext, full_name))
+                if confirm.strip('[]') == 's' or confirm.strip('[]') == 'S':
+                    ext = "Exttension removal cancelled"
+                    return full_name, ext
                 elif not confirm:
                     validateext = True
                 elif not isinstance(confirm, int):
                     pnl('Please input a valid number value')
                 else:
-                    del ext
                     ext = confirm
-            pnl('{0} is assigned extension {1}. Unassigning...'.format(fulln, ext))
+            pnl('{0} is assigned extension {1}. Unassigning...'.format(full_name, ext))
         else:
-            pnl('{0} not found. Skipping...'.format(fulln))
-            return
+            pnl('{0} not found. Skipping...'.format(full_name))
+            ext = "No results found"
+            return full_name, ext
     else:
-        pnl('{0} does not have an assigned extension.'.format(fulln))
-        return
+        pnl('{0} does not have an assigned extension.'.format(full_name))
+        ext = "No results found"
+        return full_name, ext
 
     deletetry = 0
     while userexists:
         deletetry += 1
         if deletetry >= 6:
             pnl(
-                'Maximum attempts for account removal failed. Please manually delete {0}, Ext. {1} from RingCentral.'.format(fulln, ext))
+                'Maximum attempts for account removal failed. Please manually delete {0}, Ext. {1} from RingCentral.'.format(full_name, ext))
             break
         pnl('Account removal attempt {0} out of 5.'.format(deletetry))
         if deletetry == 5:
-            pnl('Final account removal attempt for {0}...'.format(fulln))
-        enabled = find_all(S('.rc-icon-user-enabled', to_left_of=Button(fulln)))
-        disabled = find_all(S('.rc-icon-user-disabled', to_left_of=Button(fulln)))
-        inactive = find_all(S('.rc-icon-not-activated', to_left_of=Button(fulln)))
+            pnl('Final account removal attempt for {0}...'.format(full_name))
+        enabled = find_all(S('.rc-icon-user-enabled', to_left_of=Button(full_name)))
+        disabled = find_all(S('.rc-icon-user-disabled', to_left_of=Button(full_name)))
+        inactive = find_all(S('.rc-icon-not-activated', to_left_of=Button(full_name)))
         if enabled:
-            userdisable(fulln)
+            userdisable(full_name)
             del userexists
-            userexists = usercheck(fulln)
+            userexists = usercheck(full_name)
         elif disabled:
-            userdelete(fulln)
+            userdelete(full_name)
             del userexists
-            userexists = usercheck(fulln)
+            userexists = usercheck(full_name)
         elif inactive:
-            userdelete(fulln)
+            userdelete(full_name)
             del userexists
-            userexists = usercheck(fulln)
+            userexists = usercheck(full_name)
         else:
             del userexists
-            userexists = usercheck(fulln)
+            userexists = usercheck(full_name)
+    return full_name, ext

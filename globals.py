@@ -1,7 +1,11 @@
 from helium import *
 import time
+import datetime
 from selenium.common import exceptions
 import log
+import csv
+import pandas as pd
+from pathlib import Path
 
 pnl = log.print_and_log
 
@@ -10,6 +14,9 @@ pnl = log.print_and_log
 def nav_assigned():
     url = 'https://service.ringcentral.com/application/users/users/default'
     go_to(url)
+    loading()
+    if Text("Choose User Type").exists():
+        click(Button("Cancel"))
 
 
 # Navigates directly to the Unassigned Extensions web-page
@@ -20,34 +27,31 @@ def nav_unassigned():
 
 # Waits until all prompts containing a "Loading..." string no longer exist on the webpage
 def loading():
-    loaded = False
+    time.sleep(1)
+    loaded = not Text("Loading...").exists()
     while not loaded:
-        if Text("Loading").exists():
-            pnl("Waiting for \'Loading...\' prompt to resolve")
-            try:
-                wait_until(lambda: not Text("Loading...").exists(), timeout_secs=10, interval_secs=.5)
-            except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
-                pnl(e)
-                time.sleep(2)
-            else:
-                time.sleep(2)
-        elif Alert("Loading").exists():
-            pnl("Waiting for \'Loading...\' alert to resolve")
-            try:
-                wait_until(lambda: not Alert("Loading...").exists(), timeout_secs=10, interval_secs=.5)
-            except exceptions.TimeoutException or exceptions.NoSuchElementException as e:
-                pnl(e)
-                time.sleep(2)
-            else:
-                time.sleep(2)
-        else:
-            # pnl("Loading the RingCentral Webpage")
-            del loaded
-            loaded = True
-            time.sleep(2)
+        try:
+            wait_until(lambda: not Text("Loading...").exists(), timeout_secs=10, interval_secs=.1)
+        except exceptions.TimeoutException or exceptions.NoSuchElementException:
+            pass
+        loaded = not Text("Loading...").exists()
 
 
 def grab_table_value(header):
     table_cells = find_all(S("table > tbody > tr > td > span", below=header))
     cell_values = [cell.web_element.text for cell in table_cells]
     return cell_values
+
+
+def export_csv(filepath, result_df):
+    timestamp = '-autorc-{0}_{1}.'.format(datetime.date.today(), datetime.datetime.now().strftime("%H-%M"))
+    split_path = filepath.split('.')
+    outfile = ''.join(split_path[:1] + [timestamp] + split_path[1:2])
+    output = Path(outfile)
+    output.parent.mkdir(exist_ok=True)
+    try:
+        result_df.to_csv(output)
+    except IOError:
+        pnl("I/O Error while writing to {0}".format(outfile))
+        return IOError
+    return outfile

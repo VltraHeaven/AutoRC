@@ -20,25 +20,36 @@ def userdelete(name):
     click(CheckBox(to_left_of=name))
     click(Button('Delete'))
     loading()
-    click('Confirm')
-    loading()
+    try:
+        if Button('Confirm').exists():
+            click(Button('Confirm'))
+        else:
+            click(Button('OK'))
+        loading()
+    except LookupError as e:
+        pnl(e)
 
 
 # Navigates to assigned extensions, checks if a user's extension can be found, and returns true/false
 # Implement accordingly!
 def usercheck(name):
-    nav_assigned()
-    loading()
-    write('', into='Search')
-    write(name, into='Search')
-    press(ENTER)
-    loading()
-    exists = False
-    if Text('No results').exists():
-        return exists
-    else:
-        exists = Button(name).exists()
-        return exists
+    exists = None
+    while exists is None:
+        try:
+            nav_assigned()
+            loading()
+            wait_until(TextField('Search').exists)
+            write('', into='Search')
+            write(name, into='Search')
+            press(ENTER)
+            loading()
+            if Text('No results').exists():
+                exists = False
+            else:
+                exists = Button(name).exists()
+        except LookupError as e:
+            pnl(e)
+    return exists
 
 
 def remove(data, count, line):
@@ -118,7 +129,8 @@ def remove(data, count, line):
         deletetry += 1
         if deletetry >= 6:
             pnl(
-                'Maximum attempts for account removal failed. Please manually delete {0}, Ext. {1} from RingCentral.'.format(full_name, ext))
+                'Maximum attempts for account removal failed. Please manually delete {0}, Ext. {1} from RingCentral.'.format(
+                    full_name, ext))
             break
         pnl('Account removal attempt {0} out of 5.'.format(deletetry))
         if deletetry == 5:

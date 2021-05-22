@@ -115,26 +115,36 @@ def set_forward(name, ext):
         try:
             n = grab_table_value("Number")
             num = n[0]
+            if num == (False, ""):
+                pnl("{0} has not been assigned a direct RingCentral number.".format(name))
+                num = input("Please assign this user a direct RingCentral number and enter the value. Format: (000) "
+                            "000-0000")
         except exceptions.NoSuchElementException:
             pnl("Unable to capture {0}\'s RingCentral number.".format(name))
             num = input("Please type in the value under the 'Number' column for this user. Format: (000) "
                         "000-0000")
         finally:
             pnl("{0}\'s number is {1}".format(name, num))
-            continue
-
     click(Button(name))
     loading()
-    wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=60, interval_secs=.5)
-    click('Call Handling & Forwarding')
-
-    max_rings = '15 Rings / 75 Secs'
     rings_set = False
+    max_rings = '15 Rings / 75 Secs'
     while not rings_set:
+        if not ComboBox("Ring For").exists():
+            try:
+                wait_until(Text('Call Handling & Forwarding').exists, timeout_secs=120, interval_secs=.5)
+                click('Call Handling & Forwarding')
+                loading()
+            except exceptions.TimeoutException as e:
+                pnl(e)
+                continue
         try:
-            wait_until(ComboBox('Ring For', to_left_of='Desktop').exists, timeout_secs=60, interval_secs=.5)
+            wait_until(ComboBox('Ring For', to_left_of='Desktop').exists, timeout_secs=120, interval_secs=.5)
             current_rings = ComboBox('Ring For').value
         except exceptions.StaleElementReferenceException as e:
+            pnl(e)
+            continue
+        except exceptions.TimeoutException as e:
             pnl(e)
             continue
         if current_rings != max_rings:

@@ -19,7 +19,7 @@ def main():
         group.add_argument('-r', '--remove', help='Remove RingCentral extension assignments', action='store_true')
         parser.add_argument('file',
                             help='Path to the userlist .csv file.\nThe .csv must at least have the following '
-                                 'case-sensitive headers: givenName,surname,name,emailAddress,Title\n')
+                                 'case-sensitive headers: givenName,surname,name,emailAddress,Title,Department\n')
         return parser
 
     init_args = init_argparse()
@@ -49,11 +49,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt as e:
-        pnl = log.print_and_log
-        pnl('Keyboard Interrupt Detected: {0}'.format(e))
-        pnl(traceback.format_exc())
-        logging.shutdown()
-        sys.exit(0)
+    main()
